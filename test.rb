@@ -258,6 +258,37 @@ class Board
   def move(move)
     if finalList.include? move
       movePiece(move, @data)
+      if move - ((move/1000) * 1000) > 0      
+        case move - ((move/1000) * 1000)
+          when 100
+            if @white_to_play
+              board[move - ((move/100) * 100)] = 120
+            else
+              board[move - ((move/100) * 100)] = 220
+            end
+          when 200
+            if @white_to_play
+              board[move - ((move/100) * 100)] = 130
+            else
+              board[move - ((move/100) * 100)] = 230
+            end
+          when 300
+            if @white_to_play
+              board[move - ((move/100) * 100)] = 140
+            else
+              board[move - ((move/100) * 100)] = 240
+            end
+          when 400
+            if @white_to_play
+              board[move - ((move/100) * 100)] = 150
+            else
+              board[move - ((move/100) * 100)] = 250
+            end
+          end              
+        end
+      end
+      if pieceType(@data[move - ((move/100) * 100)]) == "pawm" && specialStatus(@data[move - ((move/100) * 100)]) == "none" 
+        @data[move - ((move/100) * 100)] = @data[move - ((move/100) * 100) + 1]
       if @white_to_play 
         @white_to_play = false
       else
@@ -321,34 +352,32 @@ class Board
   
 end
 
+tree = []
+
 gameOne = Board.new("std", true)
-
-
-gameOne.printBoard
-
-#gameOne.data.each do|i, j|
-#  puts "#{i}: #{j}"
-#end
-
-gameOne.initial_list_constructor
-gameOne.final_list_constructor
-
-gameOne.finalList.each do |i| # for each imediately available move
-  firstLevel = Board.new(gameOne.data, true)       # make a clone board
-  firstLevel.move(i)                               # and apply that move to it
-  firstLevel.finalList.each do |j| # for each available move of that new board
-    secondLevel = Board.new(firstLevel.data, false)      # make a clone board  
-    secondLevel.move(j)                                  # and apply that move to it
-    secondLevel.finalList.each do |k| # for each available move of that board
-      thirdLevel = Board.new(secondLevel.data, true)     # make a clone board
-      thirdLevel.move(k)                                 # and apply that move to it
-      thirdLevel.printBoard
-      puts "#{firstLevel.finalList}"
+gameOne.finalList.each do |i|
+  branch_1 = []
+  tree.push(branch_1)
+  firstLevel = Board.new(gameOne.data, true)
+  firstLevel.move(i)
+  firstLevel.initial_list_constructor
+  firstLevel.final_list_constructor
+  firstLevel.finalList.each do |j|
+    branch_2 = []
+    branch_1.push(branch_2)
+    secondLevel = Board.new(firstLevel.data, false)
+    secondLevel.move(j)
+    secondLevel.initial_list_constructor
+    secondLevel.final_list_constructor
+    secondLevel.finalList.each do |k|
+      thirdLevel = Board.new(secondLevel.data, true)
+      thirdLevel.move(k)
+      branch_2.push(1)
     end
   end
 end
 
-
+puts "#{tree}"
 
 def tree_evaluator_helper(list, level)
   if list.all? { |i| i.kind_of?(Array) }
@@ -365,10 +394,3 @@ end
 def tree_evaluator(list)
   tree_evaluator_helper(list, 0)
 end
-  
-
-
-
-
-
-
