@@ -1,7 +1,18 @@
+
+
 class Board
   
   public
   def initialize(layout="std", playerTurn=true)
+    
+    immortalSquares = [18, 28, 38, 58, 68, 78, 88, 17, 37, 47, 67, 77, 87, 25, 64, 84, 34, 54, 12, 26, 32, 42, 72, 82, 11, 21, 31, 41, 61, 71, 81] 
+    immortalPieces =  [240, 220, 230, 260, 230, 220, 240, 210, 210, 210, 210, 210, 210, 211, 211, 250, 130, 111, 110, 110, 110, 110, 110, 110, 140, 120, 130, 150, 160, 120, 140]
+
+    standardSquares = [11, 21, 31, 41, 51, 61, 71, 81, 12, 22, 32, 42, 52, 62, 72, 82, 17, 27, 37, 47, 57, 67, 77, 87, 18, 28, 38, 48, 58, 68, 78, 88]
+    standardPieces =  [140, 120, 130, 150, 160, 130, 120, 140, 110, 110, 110, 110, 110, 110, 110, 110, 210, 210, 210, 210, 210, 210, 210, 210, 240, 220, 230, 250, 260, 230, 220, 240]
+
+    testSquares = [28, 17, 16, 26, 36, 15, 65, 14, 24, 34, 44]
+    testPieces = [250, 261, 211, 211, 211, 111, 241, 161, 111, 111, 120]
     
     @white_to_play = playerTurn
     @availableMoves = []
@@ -21,10 +32,10 @@ class Board
             @data[i + j * 10] = 0
           end
         end
-    placementSquares = [11, 21, 31, 41, 51, 61, 71, 81, 12, 22, 32, 42, 52, 62, 72, 82, 17, 27, 37, 47, 57, 67, 77, 87, 18, 28, 38, 48, 58, 68, 78, 88]
-    placementPieces =  [140, 120, 130, 150, 160, 130, 120, 140, 110, 110, 110, 110, 110, 110, 110, 110, 210, 210, 210, 210, 210, 210, 210, 210, 240, 220, 230, 250, 260, 230, 220, 240]
+    placementSquares = testSquares
+    placementPieces = testPieces
 
-      for i in 0..31
+      for i in 0..10
         @data[placementSquares[i]] = placementPieces[i]
       end
     else
@@ -141,11 +152,11 @@ class Board
         knightMoves = [12, 21, 19, 8, -12, -21, -19, -8]
         if player(piece) == "white"
           knightMoves.each do |i|
-            if pieceType(board[position + i]) == "empty" || pieceType(board[position + i]) == "black" then output.push(position + i + (position * 1000)) end
+            if pieceType(board[position + i]) == "empty" || player(board[position + i]) == "black" then output.push(position + i + (position * 1000)) end
           end
         else 
           knightMoves.each do |i|
-            if pieceType(board[position + i]) == "empty" || pieceType(board[position + i]) == "white" then output.push(position + i  + (position * 1000)) end
+            if pieceType(board[position + i]) == "empty" || player(board[position + i]) == "white" then output.push(position + i  + (position * 1000)) end
           end
         end
                                                                                   
@@ -178,7 +189,10 @@ class Board
             if pieceType(board[position + i]) == "empty" || player(board[position + i]) == "black"  
               output.push(position + i + (position * 1000))
             end
-          end                                                                                                   
+          end
+          if specialStatus(piece) == "none"               
+            
+          end                                                                                    
         else                                                                                                 
           kingMoves.each do |i|                                                                                                                    # for each of the eight king moves determine if available
             if pieceType(board[position + i]) == "empty" || player(board[position + i]) == "white"  
@@ -226,7 +240,7 @@ class Board
         @kingSafetyBoard.each do |l, m|
           if pieceType(@kingSafetyBoard[l]) == "king" && player(@kingSafetyBoard[l]) == "white"  
             kingLocation = l
-            #puts "#{kingLocation}"
+            break
           end
         end
         @kingSafetyBoard.each do |l, m|
@@ -238,6 +252,7 @@ class Board
         @kingSafetyBoard.each do |l, m|
           if pieceType(@kingSafetyBoard[l]) == "king" && player(@kingSafetyBoard[l]) == "black"  
             kingLocation = l
+            break
           end
         end
         @kingSafetyBoard.each do |l, m|
@@ -258,45 +273,82 @@ class Board
   def move(move)
     if finalList.include? move
       movePiece(move, @data)
-      if move - ((move/1000) * 1000) > 0      
-        case move - ((move/1000) * 1000)
+      if move - ((move/1000) * 1000) > 99
+        case ((move - ((move/1000) * 1000)) / 100) * 100
           when 100
             if @white_to_play
-              board[move - ((move/100) * 100)] = 120
+              @data[move - ((move/100) * 100)] = 120
             else
-              board[move - ((move/100) * 100)] = 220
+              @data[move - ((move/100) * 100)] = 220
             end
           when 200
             if @white_to_play
-              board[move - ((move/100) * 100)] = 130
+              @data[move - ((move/100) * 100)] = 130
             else
-              board[move - ((move/100) * 100)] = 230
+              @data[move - ((move/100) * 100)] = 230
             end
           when 300
             if @white_to_play
-              board[move - ((move/100) * 100)] = 140
+              @data[move - ((move/100) * 100)] = 140
             else
-              board[move - ((move/100) * 100)] = 240
+              @data[move - ((move/100) * 100)] = 240
             end
           when 400
             if @white_to_play
-              board[move - ((move/100) * 100)] = 150
+              @data[move - ((move/100) * 100)] = 150
             else
-              board[move - ((move/100) * 100)] = 250
-            end
-          end              
-        end
+              @data[move - ((move/100) * 100)] = 250
+            end             
+          end
       end
-      if pieceType(@data[move - ((move/100) * 100)]) == "pawm" && specialStatus(@data[move - ((move/100) * 100)]) == "none" 
-        @data[move - ((move/100) * 100)] = @data[move - ((move/100) * 100) + 1]
-      if @white_to_play 
-        @white_to_play = false
-      else
-        @white_to_play = true
+      if (pieceType(@data[move - ((move/100) * 100)]) == "pawn" || pieceType(@data[move - ((move/100) * 100)]) == "king" || pieceType(@data[move - ((move/100) * 100)]) == "rook") && specialStatus(@data[move - ((move/100) * 100)]) == "none" 
+        @data[move - ((move/100) * 100)] = @data[move - ((move/100) * 100)] + 1
       end
+      @white_to_play = !@white_to_play
+      initial_list_constructor
+      final_list_constructor
     else
       return(0)
     end
+  end
+
+  def evaluate_board
+    evaluation = 0
+    @data.each do |i, j|
+      case pieceType(j)
+        when "pawn"
+          if player(j) == "white"
+            evaluation = evaluation + 1
+          else
+            evaluation = evaluation - 1
+          end
+        when "knight"
+          if player(j) == "white"
+            evaluation = evaluation + 3
+          else
+            evaluation = evaluation - 3
+          end
+        when "bishop"
+          if player(j) == "white"
+            evaluation = evaluation + 3
+          else
+            evaluation = evaluation - 3
+          end 
+        when "rook"
+          if player(j) == "white"
+            evaluation = evaluation + 5
+          else
+            evaluation = evaluation - 5
+          end
+        when "queen"
+          if player(j) == "white"
+            evaluation = evaluation + 8
+          else
+            evaluation = evaluation - 8
+          end
+      end
+    end
+    return evaluation
   end
 
   private
@@ -352,32 +404,36 @@ class Board
   
 end
 
-tree = []
 
-gameOne = Board.new("std", true)
-gameOne.finalList.each do |i|
-  branch_1 = []
-  tree.push(branch_1)
-  firstLevel = Board.new(gameOne.data, true)
-  firstLevel.move(i)
-  firstLevel.initial_list_constructor
-  firstLevel.final_list_constructor
-  firstLevel.finalList.each do |j|
-    branch_2 = []
-    branch_1.push(branch_2)
-    secondLevel = Board.new(firstLevel.data, false)
-    secondLevel.move(j)
-    secondLevel.initial_list_constructor
-    secondLevel.final_list_constructor
-    secondLevel.finalList.each do |k|
-      thirdLevel = Board.new(secondLevel.data, true)
-      thirdLevel.move(k)
-      branch_2.push(1)
+def deep_thought (thoughtsBool)
+  tree = []
+  thoughts = []
+  gameOne = Board.new("std", true)
+  gameOne.finalList.each do |i|
+    puts "#{i}"
+    branch_1 = []
+    tree.push(branch_1)
+    firstLevel = Board.new(gameOne.data, gameOne.playerTurn)
+    firstLevel.move(i)
+    firstLevel.finalList.each do |j|
+      branch_2 = []
+      branch_1.push(branch_2)
+      secondLevel = Board.new(firstLevel.data, firstLevel.playerTurn)
+      secondLevel.move(j)
+      secondLevel.finalList.each do |k|
+        thirdLevel = Board.new(secondLevel.data, secondLevel.playerTurn)
+        thirdLevel.move(k)
+        branch_2.push(thirdLevel.evaluate_board)
+        thoughts.push([i, j, k, thirdLevel.evaluate_board])
+      end
     end
   end
+  if thoughtsBool 
+    return thoughts
+  else
+    return tree
+  end
 end
-
-puts "#{tree}"
 
 def tree_evaluator_helper(list, level)
   if list.all? { |i| i.kind_of?(Array) }
@@ -392,5 +448,20 @@ def tree_evaluator_helper(list, level)
 end
 
 def tree_evaluator(list)
-  tree_evaluator_helper(list, 0)
+  tree_evaluator_helper(list, 1)
 end
+
+gameOne = Board.new("std", true)
+
+gameOne.printBoard
+
+temp = deep_thought(false)
+temp2 = deep_thought(true)
+puts "#{temp}"
+#puts "#{temp2}"
+puts "#{tree_evaluator(temp)}"
+
+gameOne.printBoard
+
+puts "#{gameOne.finalList}"
+
